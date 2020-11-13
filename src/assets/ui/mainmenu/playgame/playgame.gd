@@ -53,3 +53,10 @@ func _on_CreateTunneledGame_pressed():
 
 func _on_NgrokDir_pressed():
 	$NgrokDirField.popup()
+
+func _on_CreateTunneled_pressed():
+	var port: int = $CreateTunneledGameMenu/PortLine/PortField.text as int
+	var playerName: String = $CreateTunneledGameMenu/Name/NameField.text
+	var ngrok_output = Network.create_ngrok_tunnel($NgrokDirField.current_path, port, $CreateTunneledGameMenu/NgrokInfo/AuthtokenField.get_text())
+	if ngrok_output is String:
+		Network.client_server(port, playerName)

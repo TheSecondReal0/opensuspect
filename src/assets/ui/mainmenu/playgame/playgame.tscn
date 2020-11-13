@@ -151,7 +151,6 @@ margin_bottom = 190.0
 text = "BACK"
 
 [node name="PlayGameMenu" type="VBoxContainer" parent="."]
-visible = false
 anchor_right = 1.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -194,6 +193,7 @@ text = "BACK"
 flat = true
 
 [node name="CreateTunneledGameMenu" type="VBoxContainer" parent="."]
+visible = false
 anchor_right = 1.0
 margin_bottom = 182.0
 size_flags_horizontal = 3
@@ -262,7 +262,7 @@ margin_right = 1024.0
 margin_bottom = 34.0
 size_flags_horizontal = 3
 
-[node name="Create" type="Button" parent="CreateTunneledGameMenu"]
+[node name="CreateTunneled" type="Button" parent="CreateTunneledGameMenu"]
 margin_top = 118.0
 margin_right = 1024.0
 margin_bottom = 152.0
@@ -275,7 +275,6 @@ margin_bottom = 194.0
 text = "BACK"
 
 [node name="NgrokDirField" type="FileDialog" parent="."]
-visible = true
 anchor_left = 0.2
 anchor_top = 0.2
 anchor_right = 0.8
@@ -298,5 +297,5 @@ current_path = "/Documents/Godot/Godot Projects/opensuspect-main/src/"
 [connection signal="pressed" from="PlayGameMenu/Back" to="." method="_on_Back_pressed"]
 [connection signal="text_entered" from="CreateTunneledGameMenu/Name/NameField" to="." method="_on_NameField_text_entered_create"]
 [connection signal="pressed" from="CreateTunneledGameMenu/NgrokInfo/NgrokDir" to="." method="_on_NgrokDir_pressed"]
-[connection signal="pressed" from="CreateTunneledGameMenu/Create" to="." method="_on_Create_pressed"]
+[connection signal="pressed" from="CreateTunneledGameMenu/CreateTunneled" to="." method="_on_CreateTunneled_pressed"]
 [connection signal="pressed" from="CreateTunneledGameMenu/Back" to="." method="_on_Back_pressed"]

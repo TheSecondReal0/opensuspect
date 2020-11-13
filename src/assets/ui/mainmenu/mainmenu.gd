@@ -11,7 +11,6 @@ func _on_NewGame_pressed() -> void:
 	show_only("PlayGame")
 
 func _on_Settings_pressed() -> void:
-	Network.create_ngrok_tunnel("/Downloads/ngrok.exe", 42420)
 	show_only("Settings")
 
 func _on_Return() -> void:
