@@ -47,7 +47,9 @@ func client(hostName: String, port: int, playerName: String) -> void:
 	names[1] = playerName
 	client = WebSocketClient.new()
 	#use "ws://" at the beginning of address for websocket connections
-	var url: String = "ws://" + hostName# + ":" + str(port)
+	var url: String = "ws://" + hostName + ":" + str(port)
+	if hostName.begins_with("http"):
+		url = "ws://" + hostName.trim_prefix("https://").trim_prefix("http://")
 	# 3rd argument true means use Godot's high level networking API
 	var _error: int = client.connect_to_url(url, PoolStringArray(), true)
 	if (_error):
@@ -173,32 +175,36 @@ func get_peers() -> Array:
 	return peers
 
 func start_ngrok(ngrok_path: String, ngrok_port: int, ngrok_auth_token: String = ""):
+	var output: Array = []
 	match OS.get_name():
 		"Windows":
 			#str("start " + '""' + " http://www.stackoverflow.com")
-			var cmd
+			output = []
 			if ngrok_auth_token == "":
-				cmd = OS.execute("CMD.exe", [str(ngrok_path) + " http " + str(ngrok_port)], false)
+				OS.execute(ngrok_path, ["http", str(ngrok_port)], true, output)
 			else:
-				cmd = OS.execute("CMD.exe", [str(ngrok_path) + " authtoken " + ngrok_auth_token, str(ngrok_path) + " http " + str(ngrok_port)], false)
-			print(cmd)
+				OS.execute(ngrok_path, ["authtoken", ngrok_auth_token], false, output)
+				OS.execute(ngrok_path, ["http", str(ngrok_port)], false, output)
+			print(output[0])
 		"X11":
+			output = []
+			OS.execute(ngrok_path, ["http", str(ngrok_port)], true, output)
 			pass
+	for i in output:
+		print(i)
 	#get url
 	print("getting url")
-	var ngrok_url: String = ""
-	var http_request = HTTPRequest.new()
-	get_tree().get_root().add_child(http_request)
-	var test = http_request.connect("request_completed", self, "_on_request_completed")
-	print(test)
-	var error = http_request.request("http://localhost:4040/api/tunnels")
-	print(error)
-	
-
-func _on_request_completed(result, response_code, headers, body):
-	print("got url")
-	var json = JSON.parse(body.get_string_from_utf8())
-	print(json)
+	output = []
+	OS.execute("curl", ["http://localhost:4040/api/tunnels/command_line"], true, output)
+	while JSON.parse(output[0]).get_result().keys().has("error_code"):
+		#if output[0]["error_code"] != 100:
+		#	break
+		OS.execute("curl", ["http://localhost:4040/api/tunnels/command_line"], true, output)
+	var response = JSON.parse(output[0]).get_result()
+	for i in output:
+		print(i)
+	var ngrok_url = response.public_url
+	print(ngrok_url)
 
 # warning-ignore:unused_argument
 func _on_state_changed(old_state, new_state) -> void:
