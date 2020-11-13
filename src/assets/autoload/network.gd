@@ -174,27 +174,46 @@ func get_player_name(id: int = myID) -> String:
 func get_peers() -> Array:
 	return peers
 
-func start_ngrok(ngrok_path: String, ngrok_port: int, ngrok_auth_token: String = ""):
+func create_ngrok_tunnel(ngrok_path: String, ngrok_port: int, ngrok_auth_token: String = ""):
+	#start ngrok
+	print("initiating ngrok")
+	init_ngrok(ngrok_path, ngrok_port, ngrok_auth_token)
+	#get url
+	print("getting url")
+	var ngrok_url = get_ngrok_url()
+	print(ngrok_url)
+	return(ngrok_url)
+
+func init_ngrok(ngrok_path: String, ngrok_port: int, ngrok_auth_token: String = ""):
 	var output: Array = []
 	match OS.get_name():
 		"Windows":
-			#str("start " + '""' + " http://www.stackoverflow.com")
 			output = []
 			if ngrok_auth_token == "":
 				OS.execute(ngrok_path, ["http", str(ngrok_port)], true, output)
 			else:
-				OS.execute(ngrok_path, ["authtoken", ngrok_auth_token], false, output)
-				OS.execute(ngrok_path, ["http", str(ngrok_port)], false, output)
+				OS.execute(ngrok_path, ["authtoken", ngrok_auth_token], true, output)
+				OS.execute(ngrok_path, ["http", str(ngrok_port)], true, output)
 			print(output[0])
 		"X11":
 			output = []
-			OS.execute(ngrok_path, ["http", str(ngrok_port)], true, output)
-			pass
+			if ngrok_auth_token == "":
+				OS.execute(ngrok_path, ["http", str(ngrok_port)], true, output)
+			else:
+				OS.execute(ngrok_path, ["authtoken", ngrok_auth_token], true, output)
+				OS.execute(ngrok_path, ["http", str(ngrok_port)], true, output)
+		"OSX":
+			output = []
+			if ngrok_auth_token == "":
+				OS.execute(ngrok_path, ["http", str(ngrok_port)], true, output)
+			else:
+				OS.execute(ngrok_path, ["authtoken", ngrok_auth_token], true, output)
+				OS.execute(ngrok_path, ["http", str(ngrok_port)], true, output)
 	for i in output:
 		print(i)
-	#get url
-	print("getting url")
-	output = []
+
+func get_ngrok_url() -> String:
+	var output = []
 	OS.execute("curl", ["http://localhost:4040/api/tunnels/command_line"], true, output)
 	while JSON.parse(output[0]).get_result().keys().has("error_code"):
 		#if output[0]["error_code"] != 100:
@@ -204,7 +223,7 @@ func start_ngrok(ngrok_path: String, ngrok_port: int, ngrok_auth_token: String =
 	for i in output:
 		print(i)
 	var ngrok_url = response.public_url
-	print(ngrok_url)
+	return(ngrok_url)
 
 # warning-ignore:unused_argument
 func _on_state_changed(old_state, new_state) -> void:

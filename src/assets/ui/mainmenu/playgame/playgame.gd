@@ -47,3 +47,9 @@ func _on_Back_pressed():
 		get_node('..').emit_signal("returnToMainMenu")
 	else:
 		set_default()
+
+func _on_CreateTunneledGame_pressed():
+	show_only("CreateTunneledGameMenu")
+
+func _on_NgrokDir_pressed():
+	$NgrokDirField.popup()
