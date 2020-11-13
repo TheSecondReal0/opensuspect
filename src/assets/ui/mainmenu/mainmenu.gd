@@ -14,11 +14,13 @@ func start_ngrok(ngrok_path: String, ngrok_port: int, ngrok_auth_token: String =
 		"Windows":
 			#str("start " + '""' + " http://www.stackoverflow.com")
 			var cmd
+			var output = []
 			if ngrok_auth_token == "":
-				cmd = OS.execute("CMD.exe", [str(ngrok_path) + " http " + str(ngrok_port)], false)
+				cmd = OS.execute("CMD.exe", [str(ngrok_path) + " http " + str(ngrok_port)], false, output)
 			else:
 				cmd = OS.execute("CMD.exe", [str(ngrok_path) + " authtoken " + ngrok_auth_token, str(ngrok_path) + " http " + str(ngrok_port)], false)
 			print(cmd)
+			print(output)
 		"X11":
 			pass
 	#get url
@@ -28,14 +30,14 @@ func start_ngrok(ngrok_path: String, ngrok_port: int, ngrok_auth_token: String =
 	add_child(http_request)
 	var test = http_request.connect("request_completed", self, "_on_request_completed")
 	print(test)
-	var error = http_request.request("http://localhost:4040/api/tunnels/command_line")#request("http://www.mocky.io/v2/5185415ba171ea3a00704eed")request("http://localhost:4040/api/tunnels/command_line")
+	var error = http_request.request("http://localhost:4040/api/tunnels")#request("http://localhost:4040/api/tunnels/command_line")request("http://localhost:4040/api/tunnels")
 	print(error)
 
 func _on_request_completed(result, response_code, headers, body):
 	print("got url")
 	var json = JSON.parse(body.get_string_from_utf8())
 	print(result)
-	print(json[result])
+	print(json.result)
 
 func _on_NewGame_pressed() -> void:
 	show_only("PlayGame")
