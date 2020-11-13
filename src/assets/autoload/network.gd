@@ -18,6 +18,7 @@ signal server_started
 signal connection_handled
 
 func _ready() -> void:
+	#start_ngrok("D:/Downloads/ngrok.exe", 42420)
 	# give the server access to puppet functions and variables
 	set_network_master(1)
 # warning-ignore:return_value_discarded
@@ -46,7 +47,7 @@ func client(hostName: String, port: int, playerName: String) -> void:
 	names[1] = playerName
 	client = WebSocketClient.new()
 	#use "ws://" at the beginning of address for websocket connections
-	var url: String = "ws://" + hostName + ":" + str(port)
+	var url: String = "ws://" + hostName# + ":" + str(port)
 	# 3rd argument true means use Godot's high level networking API
 	var _error: int = client.connect_to_url(url, PoolStringArray(), true)
 	if (_error):
@@ -170,6 +171,34 @@ func get_player_name(id: int = myID) -> String:
 
 func get_peers() -> Array:
 	return peers
+
+func start_ngrok(ngrok_path: String, ngrok_port: int, ngrok_auth_token: String = ""):
+	match OS.get_name():
+		"Windows":
+			#str("start " + '""' + " http://www.stackoverflow.com")
+			var cmd
+			if ngrok_auth_token == "":
+				cmd = OS.execute("CMD.exe", [str(ngrok_path) + " http " + str(ngrok_port)], false)
+			else:
+				cmd = OS.execute("CMD.exe", [str(ngrok_path) + " authtoken " + ngrok_auth_token, str(ngrok_path) + " http " + str(ngrok_port)], false)
+			print(cmd)
+		"X11":
+			pass
+	#get url
+	print("getting url")
+	var ngrok_url: String = ""
+	var http_request = HTTPRequest.new()
+	get_tree().get_root().add_child(http_request)
+	var test = http_request.connect("request_completed", self, "_on_request_completed")
+	print(test)
+	var error = http_request.request("http://localhost:4040/api/tunnels")
+	print(error)
+	
+
+func _on_request_completed(result, response_code, headers, body):
+	print("got url")
+	var json = JSON.parse(body.get_string_from_utf8())
+	print(json)
 
 # warning-ignore:unused_argument
 func _on_state_changed(old_state, new_state) -> void:

@@ -29,12 +29,17 @@ func _enter_tree():
 		get_tree().connect("network_peer_disconnected", self, "_player_disconnected")
 
 # Keep the clients' player positions updated
+var timePassed = 0
 func _physics_process(_delta):
 	if get_tree().is_network_server():
 		var positions_dict = {}
 		for id in players.keys():
 			positions_dict[id] = [players[id].position, players[id].movement]
-		rpc("update_positions", positions_dict)
+		timePassed += _delta
+		#only send positions 10 times a second
+		if timePassed > .1:
+			rpc("update_positions", positions_dict)
+			timePassed = 0
 
 func connection_handled(id, playerName):
 	print("connection handled, id: ", id, " name: ", playerName)
