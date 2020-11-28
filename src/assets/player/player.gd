@@ -1,9 +1,14 @@
 extends KinematicBody2D
 
+onready var infiltrator_scene: PackedScene = load("res://assets/player/infiltrator.tscn")
+onready var sprite: AnimatedSprite = $Sprite
+
 signal main_player_moved(position)
 
 export (int) var speed = 150
 
+# Whether the player's controls are frozen
+var _movement_disabled: bool setget set_movement_disabled, is_movement_disabled
 # Set by main.gd. Is the client's unique id for this player
 var id: int
 var ourname: String
@@ -14,8 +19,10 @@ var movement = Vector2(0,0)
 # Only true when this is the player being controlled
 export var main_player = false
 #anim margin controls how big the player movement must be before animations are played
-var x_anim_margin = 0.1
-var y_anim_margin = 0.1
+var x_anim_margin = 0.00
+var y_anim_margin = 0.00
+#whether the character faces in the right direction
+var face_right = true
 
 # The input number is incremented on each _physics_process call. GDScript's int
 # type is int64_t which is enough for thousands of years of gameplay
@@ -28,6 +35,12 @@ var last_reveived_input: int = 0
 var input_queue: Array = []
 
 func _ready():
+	# Set the sprite material for every player to be a duplicate of their
+	# initial material so that outlines may be modified independently.
+
+	sprite.set_material(sprite.material.duplicate())
+	PlayerManager.connect("host_kill",self,"on_host_kill")
+
 	if "--server" in OS.get_cmdline_args():
 		main_player = false
 	if main_player:
@@ -51,25 +64,54 @@ func roles_assigned(playerRoles: Dictionary):
 		return
 	myRole = playerRoles[id]
 	changeNameColor(myRole)
+	_checkRole(myRole)
 
+func _checkRole(role: String) -> void:
+	"""
+	Performs certain functions depending on the passed in role parameter.
+	"""
+	match role:
+		"traitor":
+			set_collision_layer_bit(3, true)
+			if not has_node("Infiltrator"):
+				add_child(infiltrator_scene.instance())
+		"detective":
+			if has_node("Infiltrator"):
+				get_node("Infiltrator").queue_free()
+		"default":
+			set_collision_layer_bit(2, true)
+			if has_node("Infiltrator"):
+				get_node("Infiltrator").queue_free()
 func changeNameColor(role: String):
 	match role:
 		"traitor":
 			if PlayerManager.ourrole == "traitor":
-				setNameColor(Color(1,0,0))
+				setNameColor(PlayerManager.playerColors["traitor"])
 		"detective":
 			#not checking if our role is detective because everyone should see detectives
-			setNameColor(Color(0,0,1))
+			setNameColor(PlayerManager.playerColors["detective"])
 		"default":
-			setNameColor(Color(1,1,1))
+			setNameColor(PlayerManager.playerColors["default"])
 
 func setNameColor(newColor: Color):
 	$Label.set("custom_colors/font_color", newColor)
 
+func is_movement_disabled() -> bool:
+	"""
+	Returns whether player movement is disabled or not.
+	"""
+	return _movement_disabled
+
+func set_movement_disabled(movement_disabled: bool) -> void:
+	"""
+	Set whether player movement should be disabled.
+	"""
+	_movement_disabled = movement_disabled
+
 # Only called when main_player is true
 func get_input():
 	movement = Vector2(0, 0)
-	if not UIManager.in_menu():
+	if not UIManager.in_menu() and not is_movement_disabled():
 		movement.x = Input.get_action_strength('ui_right') - Input.get_action_strength('ui_left')
 		movement.y = Input.get_action_strength('ui_down') - Input.get_action_strength('ui_up')
 		movement = movement.normalized()
@@ -97,17 +139,21 @@ func _physics_process(_delta):
 
 	# We handle animations and stuff here
 	if movement.x > x_anim_margin:
-		$Sprite.play("walk-h")
-		$Sprite.flip_h = false
+		$spritecollection/AnimationPlayer.play("h_move")
+		if not face_right:
+			face_right = true
+			$spritecollection.scale.x = -$spritecollection.scale.x
 	elif movement.x < -x_anim_margin:
-		$Sprite.play("walk-h")
-		$Sprite.flip_h = true
+		$spritecollection/AnimationPlayer.play("h_move")
+		if face_right:
+			face_right = false
+			$spritecollection.scale.x = -$spritecollection.scale.x
 	elif movement.y > y_anim_margin:
-		$Sprite.play("walk-down")
+		$spritecollection/AnimationPlayer.play("h_move")
 	elif movement.y < -y_anim_margin:
-		$Sprite.play("walk-up")
+		$spritecollection/AnimationPlayer.play("h_move")
 	else:
-		$Sprite.play("idle")
+		$spritecollection/AnimationPlayer.play("idle", 0.2)
 
 # Only called on the main player. Rerolls the player's unreceived inputs on top
 # of the server's player position

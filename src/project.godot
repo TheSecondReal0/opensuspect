@@ -9,6 +9,21 @@
 config_version=4
 
 _global_script_classes=[ {
+"base": "Resource",
+"class": "Interact",
+"language": "GDScript",
+"path": "res://addons/opensusinteraction/resources/interact/interact.gd"
+}, {
+"base": "Resource",
+"class": "InteractMap",
+"language": "GDScript",
+"path": "res://addons/opensusinteraction/resources/interactmap/interactmap.gd"
+}, {
+"base": "Resource",
+"class": "InteractUI",
+"language": "GDScript",
+"path": "res://addons/opensusinteraction/resources/interactui/interactui.gd"
+}, {
 "base": "Popup",
 "class": "PopupBase",
 "language": "GDScript",
@@ -40,6 +55,9 @@ _global_script_classes=[ {
 "path": "res://assets/common/classes/ui/task/windowdialogtask.gd"
 } ]
 _global_script_class_icons={
+"Interact": "",
+"InteractMap": "",
+"InteractUI": "",
 "PopupBase": "",
 "PopupPanelBase": "",
 "PopupPanelTask": "",
@@ -66,11 +84,16 @@ SceneManager="*res://assets/autoload/scenemanager.gd"
 UIManager="*res://assets/autoload/uimanager.gd"
 MapManager="*res://assets/autoload/mapmanager.gd"
 TaskManager="*res://assets/autoload/taskmanager.gd"
+Dlman="*res://assets/autoload/dlman.gd"
 
 [display]
 
 window/stretch/mode="2d"
 window/stretch/aspect="expand"
+
+[editor_plugins]
+
+enabled=PoolStringArray( "opensusinteraction" )
 
 [gui]
 
@@ -115,6 +138,23 @@ ui_page_up={
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777235,"unicode":0,"echo":false,"script":null)
  ]
 }
+kill={
+"deadzone": 0.5,
+"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":70,"unicode":0,"echo":false,"script":null)
+ ]
+}
+reload={
+"deadzone": 0.5,
+"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":82,"unicode":0,"echo":false,"script":null)
+ ]
+}
+
+[layer_names]
+
+2d_physics/layer_1="terrain"
+2d_physics/layer_2="players"
+2d_physics/layer_3="scientists"
+2d_physics/layer_4="infiltrators"
 
 [locale]
 

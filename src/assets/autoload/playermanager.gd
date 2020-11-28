@@ -18,14 +18,16 @@ var roles: Dictionary = {"traitor": {"percent": float(2)/7, "amount": 1, "critic
 						"detective": {"percent": float(1)/7, "amount": 1, "critical": false}, 
 						"default": {"percent": 0, "amount": 0, "critical": false}}
 var playerRoles: Dictionary = {}
+var playerColors: Dictionary = {enabledRoles[0]: Color(1,0,0),# traitor
+								enabledRoles[1]: Color(0,0,1),# detective
+								enabledRoles[2]: Color(1,1,1)}# default
 var rng = RandomNumberGenerator.new()
 signal roles_assigned
-
+signal host_kill
 func _ready():
 	set_network_master(1)
 # warning-ignore:return_value_discarded
 	GameManager.connect("state_changed", self, "state_changed")
-
 func assigntasks():
 	for id in Network.peers:
 		taskstoassign = tasks
