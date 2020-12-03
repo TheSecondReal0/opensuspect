@@ -13,7 +13,7 @@ var player_name: String setget toss, get_player_name
 puppet var peers: Array = []
 puppet var names: Dictionary = {}
 var myID: int = 1
-var rawmap
+
 signal server_started
 signal connection_handled
 
@@ -52,7 +52,7 @@ func client(hostName: String, port: int, playerName: String) -> void:
 	if (_error):
 		print("Error when connecting to server: ", _error)
 		get_tree().quit()
-		
+
 	get_tree().set_network_peer(client)
 	connect_signals()
 	#do not switch to main scene here, wait until the connection was successful
@@ -75,7 +75,6 @@ func _player_connected(id) -> void:
 		# remotely set myID var of new player to their network id
 		# sync peer list of all players
 		rset("peers", peers)
-		
 
 func _player_disconnected(id) -> void:
 	peers.erase(id)
@@ -113,7 +112,7 @@ func _process(_delta) -> void:
 
 func toss(_newValue) -> void:
 	pass
-	
+
 func deny() -> void:
 	pass
 
